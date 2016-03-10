@@ -1,5 +1,10 @@
 #pragma once
 
+/*
+ * Архитектура: Linux
+ *
+ */
+
 #include <iostream>
 #include <vector>
 #include <string>
