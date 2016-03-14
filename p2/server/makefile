@@ -1,7 +1,7 @@
 CXX=g++
 CXXFLAGS=-c -g -std=c++14
 LDFLAGS=
-OBJECTS=main.o server.o 
+OBJECTS=main.o server.o buffer.o
 EXECUTABLE=chatsrv
 
 all: $(EXECUTABLE)

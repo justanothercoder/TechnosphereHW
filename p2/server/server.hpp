@@ -8,11 +8,13 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <map>
 #include <sys/epoll.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/fcntl.h>
 #include <arpa/inet.h>
+#include "buffer.hpp"
 
 class Server
 {
@@ -35,4 +37,5 @@ private:
     int max_events = 10;
 
     std::vector<int> sockets;
+    std::map<int, Buffer> buffers;
 };

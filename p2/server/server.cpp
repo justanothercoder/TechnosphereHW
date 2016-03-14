@@ -48,8 +48,7 @@ std::string Server::read_from(int fd)
 
     int r;
     while ((r = recv(fd, buf, sizeof(buf), 0)) > 0) {
-        std::cout << r << std::endl;
-        data += buf;
+        data += std::string(buf, buf + r);
     }
 
     return data;
@@ -77,7 +76,7 @@ void Server::run()
         for (int i = 0; i < number_of_fd; ++i) {
             if ( (events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP) ) {
                 shutdown(events[i].data.fd, SHUT_RDWR);
-                std::cout << "connection terminated" << std::endl;
+                std::cout << "connection terminated\n" << std::flush;
                 epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
             } else if (events[i].data.fd == master_socket) {
                 struct sockaddr_in in_addr;
@@ -89,22 +88,32 @@ void Server::run()
                 sockets.push_back(fd);
 
                 send_to(fd, "Welcome to chat\n");
-                std::cout << "accepted connection" << std::endl;
+                std::cout << "accepted connection\n" << std::flush;
 
                 ev.data.fd = fd;
                 ev.events = EPOLLIN;
 
                 epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &ev);
+
+                std::cerr << "Registered " << fd << '\n';
             } else {
                 int fd = events[i].data.fd;
+                std::cerr << "Read event " << fd << '\n';
 
                 std::string data = read_from(fd);
-                std::cout << data << std::endl;
 
-                data = "Message from <" + std::to_string(fd) + ">: " + data;
+                buffers[fd].add(data);
 
-                for (auto sfd : sockets) {
-                    send_to(sfd, data);
+                while (buffers[fd].has_messages()) {
+                    data = buffers[fd].get();
+
+                    std::cout << data << std::flush;
+
+                    data = "Message from <" + std::to_string(fd) + ">: " + data;
+
+                    for (auto sfd : sockets) {
+                        send_to(sfd, data);
+                    }
                 }
             }
         }
