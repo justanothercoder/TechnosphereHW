@@ -74,10 +74,10 @@ void Server::run()
         int number_of_fd = epoll_wait(epoll_fd, events.data(), max_events, -1);
 
         for (int i = 0; i < number_of_fd; ++i) {
-            if ( (events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP) ) {
+            if ( (events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP) || (events[i].events & EPOLLRDHUP) ) {
                 shutdown(events[i].data.fd, SHUT_RDWR);
                 std::cout << "connection terminated\n" << std::flush;
-                epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
+                epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, &ev);
             } else if (events[i].data.fd == master_socket) {
                 struct sockaddr_in in_addr;
                 socklen_t len;                
@@ -101,6 +101,13 @@ void Server::run()
                 std::cerr << "Read event " << fd << '\n';
 
                 std::string data = read_from(fd);
+
+                if (data == "") {
+                    shutdown(events[i].data.fd, SHUT_RDWR);
+                    std::cout << "connection terminated\n" << std::flush;
+                    epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, &ev);
+                    continue;
+                }
 
                 buffers[fd].add(data);
 
