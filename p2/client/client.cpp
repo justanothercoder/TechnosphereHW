@@ -1,4 +1,5 @@
 #include "client.hpp"
+#include <errno.h>
 
 int set_nonblock(int fd)
 {
@@ -35,7 +36,8 @@ void Client::run()
         FD_SET(0, &set);
         FD_SET(client_socket, &set);
         
-        if (select(client_socket + 1, &set, NULL, NULL, NULL) == -1) {
+        if (select(client_socket + 1, &set, NULL, NULL, NULL) == -1 || errno == ECONNREFUSED) {
+            std::cerr << "Connection refused\n";
             break;
         }
    
