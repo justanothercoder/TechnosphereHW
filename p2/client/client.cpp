@@ -21,10 +21,6 @@ Client::Client()
 
     set_nonblock(client_socket);
     connect(client_socket, (const sockaddr*)&sock_addr, sizeof(sock_addr));
-
-    FD_ZERO(&set);
-    FD_SET(0, &set);
-    FD_SET(client_socket, &set);
 }
 
 Client::~Client()
@@ -35,12 +31,16 @@ Client::~Client()
 void Client::run()
 {
     while (true) {
-        select(client_socket + 1, &set, NULL, NULL, NULL);
+        FD_ZERO(&set);
+        FD_SET(0, &set);
+        FD_SET(client_socket, &set);
         
+        select(client_socket + 1, &set, NULL, NULL, NULL);
+   
         if (FD_ISSET(0, &set)) {
             std::string line;
             std::getline(std::cin, line);
-            send_to(client_socket, line);
+            send_to(client_socket, line + "\n");
         }        
 
         if (FD_ISSET(client_socket, &set)) {
