@@ -35,7 +35,9 @@ void Client::run()
         FD_SET(0, &set);
         FD_SET(client_socket, &set);
         
-        select(client_socket + 1, &set, NULL, NULL, NULL);
+        if (select(client_socket + 1, &set, NULL, NULL, NULL) == -1) {
+            break;
+        }
    
         if (FD_ISSET(0, &set)) {
             std::string line;
