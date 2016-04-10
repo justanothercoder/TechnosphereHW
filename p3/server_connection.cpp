@@ -1,6 +1,8 @@
 #include "server_connection.hpp"
 #include <iostream>
 #include <boost/bind.hpp>
+#include <chrono>
+#include <thread>
     
 ServerConnection::ServerConnection(boost::asio::io_service& io_service) 
     : client_socket(io_service)
@@ -78,9 +80,17 @@ void ServerConnection::read_from_client_handler(const boost::system::error_code&
     }
     else if (!error) {
         buf_from_client.append(temp_from_client_buf.begin(), temp_from_client_buf.begin() + bytes_transferred);
-        
+               
         tmp_from = buf_from_client;
         buf_from_client = "";
+        client_socket.async_read_some(boost::asio::buffer(temp_from_client_buf),
+                                      boost::bind(&ServerConnection::read_from_client_handler,
+                                                  shared_from_this(),
+                                                  boost::asio::placeholders::error,
+                                                  boost::asio::placeholders::bytes_transferred));
+        using namespace std::chrono_literals;
+        std::this_thread::sleep_for(1ms);
+
         async_write(server_socket, 
                     boost::asio::buffer(tmp_from), 
                     boost::bind(&ServerConnection::write_to_server_handler, 
@@ -88,11 +98,6 @@ void ServerConnection::read_from_client_handler(const boost::system::error_code&
                                 boost::asio::placeholders::error, 
                                 boost::asio::placeholders::bytes_transferred));
         
-        client_socket.async_read_some(boost::asio::buffer(temp_from_client_buf),
-                                      boost::bind(&ServerConnection::read_from_client_handler,
-                                                  shared_from_this(),
-                                                  boost::asio::placeholders::error,
-                                                  boost::asio::placeholders::bytes_transferred));
     } else {
         server_socket.close();
         client_socket.close();
