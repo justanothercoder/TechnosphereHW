@@ -8,8 +8,8 @@ ServerConnection::ServerConnection(boost::asio::io_service& io_service)
     : client_socket(io_service)
     , server_socket(io_service)
 { 
-    temp_from_client_buf.resize(5);
-    temp_to_client_buf.resize(5);
+    temp_from_client_buf.resize(1024);   
+    temp_to_client_buf.resize(1024);
 }
 tcp::socket& ServerConnection::socket() { return client_socket; }
 
