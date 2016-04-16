@@ -6,7 +6,7 @@
 class ProcessTree
 {
 public:
-    virtual int run() = 0;
+    virtual void run() = 0;
 
     bool is_daemon = false;
 };
@@ -17,7 +17,7 @@ class LeafProcess : public ProcessTree
 {
 public:
     LeafProcess(Command command);
-    int run() override;
+    void run() override;
 private:
     Command command;
 };
@@ -26,7 +26,7 @@ class PipeProcess : public ProcessTree
 {
 public:
     PipeProcess(Tree from, Tree to);
-    int run() override;
+    void run() override;
 
 private:
     Tree from;
@@ -37,7 +37,7 @@ class AndProcess : public ProcessTree
 {
 public:
     AndProcess(Tree left, Tree right);
-    int run() override;
+    void run() override;
 
 private:
     Tree left;
@@ -48,7 +48,7 @@ class OrProcess : public ProcessTree
 {
 public:
     OrProcess(Tree left, Tree right);
-    int run() override;
+    void run() override;
 
 private:
     Tree left;

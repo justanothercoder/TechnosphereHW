@@ -8,7 +8,7 @@
 
 LeafProcess::LeafProcess(Command command) : command(command) { }
 
-int LeafProcess::run()
+void LeafProcess::run()
 {
     std::unique_ptr<const char*[]> args(new const char*[command.args.size() + 2]);
 
@@ -36,33 +36,40 @@ int LeafProcess::run()
 
 PipeProcess::PipeProcess(Tree from, Tree to) : from(std::move(from)), to(std::move(to)) { }
 
-int PipeProcess::run()
+void PipeProcess::run()
 {
     int p[2];
     pipe(p);
 
-    if (fork() == 0) {
+    pid_t pid1;
+    if ((pid1 = fork()) == 0) {
         dup2(p[1], 1);
         close(p[1]);
+        close(p[0]);
         from->run();
     }
 
-    if (fork() == 0) {
+    pid_t pid2;
+    if ((pid2 = fork()) == 0) {
         dup2(p[0], 0);
         close(p[0]);
+        close(p[1]);
         to->run();
     }
 
     close(p[0]);
     close(p[1]);
 
-    while (wait(nullptr) != -1) { }
-    exit(0);
+    int status;
+    waitpid(pid1, nullptr, 0);
+    waitpid(pid2, &status, 0);
+    
+    exit(WIFEXITED(status) ? WEXITSTATUS(status) : 1);
 }
 
 AndProcess::AndProcess(Tree left, Tree right) : left(std::move(left)), right(std::move(right)) { }
 
-int AndProcess::run()
+void AndProcess::run()
 {
     if (fork() == 0) {
         left->run();
@@ -71,12 +78,13 @@ int AndProcess::run()
     wait(&status);
     status = WIFEXITED(status) ? WEXITSTATUS(status) : 1;
 
-    exit(status ? status : right->run());
+    if (status) { exit(status); };
+    right->run();
 }
 
 OrProcess::OrProcess(Tree left, Tree right) : left(std::move(left)), right(std::move(right)) { }
 
-int OrProcess::run()
+void OrProcess::run()
 {
     if (fork() == 0) {
         left->run();
@@ -84,5 +92,7 @@ int OrProcess::run()
     int status;
     wait(&status);
     status = WIFEXITED(status) ? WEXITSTATUS(status) : 1;
-    exit(status ? right->run() : status);
+
+    if (!status) { exit(status); }
+    right->run();
 }
