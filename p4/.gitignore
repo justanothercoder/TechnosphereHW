@@ -1,0 +1,10 @@
+*.o
+*.bin
+checker.cpp
+*.py
+res
+temp
+checker
+index_sort
+test
+*.swp
