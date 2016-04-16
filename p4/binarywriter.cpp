@@ -15,6 +15,11 @@ void BinaryWriter::write(std::uint64_t n)
     out.write(reinterpret_cast<char*>(&n), sizeof(n));
 }
 
+void BinaryWriter::write32Int(std::uint32_t n)
+{
+    out.write(reinterpret_cast<char*>(&n), sizeof(n));
+}
+
 std::uint64_t BinaryWriter::offset() 
 {
     return out.tellp();

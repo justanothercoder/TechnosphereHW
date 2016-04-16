@@ -96,7 +96,7 @@ void Sorter::mergeBlocks(const std::string& save_to)
             dict_writer.write(word_id);
             dict_writer.write(writer.offset());
 
-            writer.write(doc_count[word_id]);
+            writer.write32Int(doc_count[word_id]);
         }
         writer.write(doc_id);
 

@@ -10,6 +10,8 @@ public:
     void seek(std::uint64_t offset);    
 
     void write(std::uint64_t n);
+    void write32Int(std::uint32_t n);
+
     std::uint64_t offset();
 
 private:
