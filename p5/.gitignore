@@ -1,0 +1,6 @@
+*.o
+*.bin
+checker.cpp
+*.py
+shell
+*.swp
