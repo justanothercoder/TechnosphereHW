@@ -25,7 +25,7 @@ void LeafProcess::run()
     }
     
     if (command.out_file != "") {
-        int fd = open(command.out_file.data(), O_CREAT | O_WRONLY | O_TRUNC, 0755);
+        int fd = open(command.out_file.data(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
         dup2(fd, 1);
         close(fd);
     }

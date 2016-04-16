@@ -3,6 +3,7 @@
 
 int main()
 {
-    Shell shell;    
+    Shell shell;
+    global_shell = &shell;
     shell.run();
 }

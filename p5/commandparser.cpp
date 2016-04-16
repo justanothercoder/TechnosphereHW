@@ -96,7 +96,7 @@ void CommandParser::tokenize(const std::string& line)
 
 bool CommandParser::isNotOperation(const std::string& line)
 {
-    return line != "&&" && line != "||" && line != "|" && line != "<" && line != ">";
+    return line != "&&" && line != "||" && line != "|" && line != "<" && line != ">" && line != "&";
 }
 
 Tree CommandParser::parse_command()
