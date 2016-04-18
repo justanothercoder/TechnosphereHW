@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include "shell.hpp"
 
 LeafProcess::LeafProcess(Command command) : command(command) { }
 
@@ -56,6 +57,7 @@ void PipeProcess::run()
         close(p[1]);
         to->run();
     }
+    global_shell->current_pid = pid2;
 
     close(p[0]);
     close(p[1]);
@@ -71,7 +73,7 @@ AndProcess::AndProcess(Tree left, Tree right) : left(std::move(left)), right(std
 
 void AndProcess::run()
 {
-    if (fork() == 0) {
+    if ((global_shell->current_pid = fork()) == 0) {
         left->run();
     }
     int status;

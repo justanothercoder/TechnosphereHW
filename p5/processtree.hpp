@@ -3,6 +3,10 @@
 #include <memory>
 #include "command.hpp"
 
+class Shell;
+
+extern Shell* global_shell;
+
 class ProcessTree
 {
 public:

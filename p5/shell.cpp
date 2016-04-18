@@ -9,9 +9,12 @@ Shell* global_shell = nullptr;
 
 void sigint_handler(int signum)
 {
+    signal(SIGINT, sigint_handler);
+    std::cerr << "SIGINT handler\n" << "Current pid: " << global_shell->current_pid << '\n';
+
     if (global_shell->current_pid != 0) {
         kill(global_shell->current_pid, SIGINT);
-        waitpid(global_shell->current_pid, nullptr, 0);
+//        waitpid(global_shell->current_pid, nullptr, 0);
     }
 }
     
@@ -30,12 +33,15 @@ void Shell::run()
         
         pid_t pid;
         if ((pid = fork()) == 0) {
+//            signal(SIGINT, SIG_DFL);
             tree->run();
         } else {
             if (!tree->is_daemon) {
                 int status;
                 current_pid = pid;
-                waitpid(pid, &status, 0);
+                if (waitpid(pid, &status, 0) <= 0) {
+                    continue;
+                }
                 current_pid = 0;
             } else {
                 daemon_pids.emplace(pid);
