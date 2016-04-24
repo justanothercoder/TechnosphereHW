@@ -23,7 +23,9 @@ std::map<std::uint64_t, std::vector<std::uint64_t>> BinaryReader::getBatch(std::
                state = 0;
            } else {
                std::uint64_t doc_id;
-               in.read(reinterpret_cast<char*>(&doc_id), sizeof(doc_id));
+               if (!in.read(reinterpret_cast<char*>(&doc_id), sizeof(doc_id))) {
+                   break;
+               }
                ++read_words;
                read += sizeof(doc_id);
                result[current_docid].emplace_back(doc_id);
